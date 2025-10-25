@@ -1295,6 +1295,38 @@ function Assets:Dropdown(Parent,ScreenAsset,Window,Dropdown)
 	function Dropdown:ToolTip(Text)
 		Assets:ToolTip(DropdownAsset,ScreenAsset,Text)
 	end
+
+	-- Dynamic update helpers
+	function Dropdown:SetOptions(newList, keepSelection)
+		-- Preserve selection if requested
+		local keep = {}
+		if keepSelection then
+			for _,name in ipairs(Dropdown.Internal.Value or {}) do
+				keep[name] = true
+			end
+		end
+		-- rebuild list
+		Dropdown:Clear()
+		for i,opt in ipairs(newList or {}) do
+			AddOption(opt, true, i)
+		end
+		-- restore selection (no callbacks)
+		if keepSelection then
+			for _,opt in pairs(Dropdown.List) do
+				local sel = keep[opt.Name] == true
+				opt.Internal.Value = sel -- bypass Changed to avoid firing callbacks
+				opt.ColorConfig[1] = sel
+				if opt.Object and opt.Object:FindFirstChild("Tick") then
+					opt.Object.Tick.BackgroundColor3 = sel and Window.Color or Color3.fromRGB(60,60,60)
+				end
+			end
+		end
+		RefreshSelected()
+	end
+	function Dropdown:Refresh(keepSelection)
+		return Dropdown:SetOptions(Dropdown.List, keepSelection ~= false)
+	end
+
 end
 function Assets:Colorpicker(Parent,ScreenAsset,Window,Colorpicker)
 	local ColorpickerAsset = GetAsset("Colorpicker/Colorpicker")
