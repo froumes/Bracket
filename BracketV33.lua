@@ -1100,7 +1100,7 @@ function Assets:Dropdown(Parent,ScreenAsset,Window,Dropdown)
 	DropdownAsset.Title.Visible = not Dropdown.HideName
 
 	DropdownAsset.MouseButton1Click:Connect(function()
-		if not OptionContainerAsset.Visible and OptionContainerAsset.ListLayout.AbsoluteContentSize.Y ~= 0 then
+		if not OptionContainerAsset.Visible then
 			ContainerRender = RunService.RenderStepped:Connect(function()
 				if not OptionContainerAsset.Visible then ContainerRender:Disconnect() end
 
@@ -1308,6 +1308,7 @@ function Assets:Dropdown(Parent,ScreenAsset,Window,Dropdown)
 		-- rebuild list
 		Dropdown:Clear()
 		for i,opt in ipairs(newList or {}) do
+			if typeof(opt) == "string" then opt = { Name = opt } end
 			AddOption(opt, true, i)
 		end
 		-- restore selection (no callbacks)
@@ -1315,6 +1316,7 @@ function Assets:Dropdown(Parent,ScreenAsset,Window,Dropdown)
 			for _,opt in pairs(Dropdown.List) do
 				local sel = keep[opt.Name] == true
 				opt.Internal.Value = sel -- bypass Changed to avoid firing callbacks
+				opt.Value = sel
 				opt.ColorConfig[1] = sel
 				if opt.Object and opt.Object:FindFirstChild("Tick") then
 					opt.Object.Tick.BackgroundColor3 = sel and Window.Color or Color3.fromRGB(60,60,60)
